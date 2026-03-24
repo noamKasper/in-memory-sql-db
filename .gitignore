@@ -1,0 +1,7 @@
+TinySQL.md
+.vscode
+*.exe
+build
+out
+.editorconfig
+CMakePresets.json
