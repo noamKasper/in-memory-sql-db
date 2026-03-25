@@ -1,39 +1,28 @@
 #include <iostream>
 #include <string>
-#include "myfunctions.h"
+#include <vector>
+#include "tokenizer.h"
 
-class Query
-{
-public:
-    static constexpr char EXIT_CHAR = 'q';
-private:
-    std::string m_query{};
-public:
-    void ReadLine()
-    {
-        std::cout << ">>  ";
-        std::getline(std::cin, m_query);
+const char* const EXIT_STRING = ".quit";
+
+void PrintTokens(std::vector<Token> tokens) {
+    for (const Token& token : tokens) {
+        std::cout << '[' << token.idx << "] " << static_cast<int>(token.type) << ": " << token.value << std::endl;
     }
-
-    void Echo()
-    {
-        std::cout << "Your input was: " << m_query << '\n';
-    }
-
-    bool IsExitQuery()
-    {
-        return m_query.length() == 1 && m_query[0] == Query::EXIT_CHAR;
-    }
-
-};
+}
 
 int main(int, char**)
 {
+
+    std::string test = "test";
+    std::cout << test.substr(1,2) << '\n';
     std::cout << "Welcome to TinySQL\n";
-    Query query = Query();
-    do
-    {
-        query.ReadLine();
-        query.Echo();
-    } while (!query.IsExitQuery());
+    std::string query;
+
+    std::cout << ">>>  ";
+    std::getline(std::cin, query);
+    Tokenizer tokenzier = Tokenizer(query);
+    auto tokens = tokenzier.Tokenize();
+
+    PrintTokens(tokens);
 }

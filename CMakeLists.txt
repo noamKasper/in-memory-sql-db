@@ -3,5 +3,7 @@ project(in-memory-sql-db VERSION 0.1.0 LANGUAGES C CXX)
 
 add_executable(in-memory-sql-db src/main.cpp)
 
-target_include_directories(in-memory-sql-db PRIVATE src/myfunctions.h)
+target_include_directories(in-memory-sql-db PRIVATE src/tokenizer.h)
+target_include_directories(in-memory-sql-db PRIVATE src/table.h)
+target_include_directories(in-memory-sql-db PRIVATE src/engine.h)
 
