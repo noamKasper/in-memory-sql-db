@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -24,6 +25,8 @@ enum class TokenType {
     LEFT_PAREN,        // (
     RIGHT_PAREN,       // )
     SEMICOLON,         // ;
+    KW_QUIT,           // .quit
+    KW_TABLES,         // .tables
     KW_SELECT,
     KW_FROM,
     KW_WHERE,
@@ -64,6 +67,8 @@ const std::unordered_map<std::string, TokenType> SYMBOL_TOKEN_MAP = {
 };
 
 const std::unordered_map<std::string, TokenType> KEYWORD_TOKEN_MAP = {
+    {".quit", TokenType::KW_QUIT},
+    {".table", TokenType::KW_TABLE},
     {"SELECT", TokenType::KW_SELECT},
     {"FROM",   TokenType::KW_FROM},
     {"WHERE",  TokenType::KW_WHERE},
@@ -130,6 +135,12 @@ public:
         if (IsEndLine())
             return "\0";
         return std::string{ m_query[m_currentIdx] };
+    }
+
+    std::string PeekAhead() const {
+        if ( m_currentIdx + 1 >= m_query.length())
+            return "\0";
+        return std::string {m_query[m_currentIdx + 1]};
     }
 
     std::string Advance() {

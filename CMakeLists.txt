@@ -6,4 +6,5 @@ add_executable(in-memory-sql-db src/main.cpp)
 target_include_directories(in-memory-sql-db PRIVATE src/tokenizer.h)
 target_include_directories(in-memory-sql-db PRIVATE src/table.h)
 target_include_directories(in-memory-sql-db PRIVATE src/engine.h)
+target_include_directories(in-memory-sql-db PRIVATE src/parser.h)
 
