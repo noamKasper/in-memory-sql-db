@@ -7,4 +7,5 @@ target_include_directories(in-memory-sql-db PRIVATE src/tokenizer.h)
 target_include_directories(in-memory-sql-db PRIVATE src/table.h)
 target_include_directories(in-memory-sql-db PRIVATE src/engine.h)
 target_include_directories(in-memory-sql-db PRIVATE src/parser.h)
+target_include_directories(in-memory-sql-db PRIVATE src/exception.h)
 
