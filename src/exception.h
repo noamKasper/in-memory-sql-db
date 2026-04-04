@@ -25,9 +25,16 @@ public:
         : GeneralException("The command contains no tokens", 0) {}
 };
 
+class NotEnoughTokensException : public GeneralException {
+public:
+    NotEnoughTokensException()
+        : GeneralException("The command doesn't contain tokens", 0) {}
+};
+
 class InvalidTokenException : public GeneralException {
 public:
     InvalidTokenException(std::string token, std::string message, unsigned int idx)
         : GeneralException("Invalid token \"" + token + "\" at position " + std::to_string(idx) + ": " + message, idx) {
     }
 };
+

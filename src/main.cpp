@@ -32,11 +32,11 @@ int main(int, char**) {
         std::cout << output << std::endl;
     }
     catch (GeneralException& e) {
-        std::cout << query << "\n";
-        std::cout << std::string(e.GetExceptionIdx(), ' ') << '^' << "\n";
-        std::cout << e.what() << std::endl;
+        std::cerr << query << "\n";
+        std::cerr << std::string(e.GetExceptionIdx(), ' ') << '^' << "\n";
+        std::cerr << e.what() << std::endl;
     }
     catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
 }

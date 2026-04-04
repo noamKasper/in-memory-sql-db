@@ -49,6 +49,9 @@ public:
     }
 
     std::string Execute() override {
-        return "Yippiee";
+        std::string result;
+        for (const std::string& column : m_columns)
+            result += column + ", ";
+        return result;
     }
 };

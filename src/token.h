@@ -108,8 +108,16 @@ public:
 
     Token(std::string value, unsigned int idx, TokenType type) : m_value(value), m_idx(idx), m_type(type) {}
 
+    std::string GetValue() const {
+        return m_value;
+    }
+    
     TokenType GetType() const {
         return m_type;
+    }
+
+    bool IsType(TokenType type) const {
+        return m_type == type;
     }
 
     void Print() const {
@@ -120,6 +128,9 @@ public:
         return InvalidTokenException(m_value, "", m_idx);
     }
 
+    InvalidTokenException GetInvalidTokenException(std::string message) {
+        return InvalidTokenException(m_value, message, m_idx);
+    }
 
     static TokenType GetTokenType(std::string word, unsigned int idx) {
         if (word.length() == 0)
@@ -145,4 +156,5 @@ public:
 
         return TokenType::IDENTIFIER;
     }
+
 };

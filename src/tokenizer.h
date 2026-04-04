@@ -26,22 +26,22 @@ private:
     }
 
     bool IsSymbol() const {
-        return IsSymbol(std::string{Peek()});
+        return IsSymbol(std::string{ Peek() });
     }
 
-    bool IsSymbol(unsigned int start, unsigned int length){
-        return !IsEndLine(start+length-1) && IsSymbol(m_query.substr(start, length));
+    bool IsSymbol(unsigned int start, unsigned int length) {
+        return !IsEndLine(start + length - 1) && IsSymbol(m_query.substr(start, length));
     }
 
-    bool IsSymbolFrom(unsigned int start){
-        switch (m_currentIdx-start) {
-            case 1:
-                return IsSymbol(start, 1) && !IsSymbol(start, 2);
-            case 2:
-                return IsSymbol(start, 2);
-            default:
-                return false;
-        } 
+    bool IsSymbolFrom(unsigned int start) {
+        switch (m_currentIdx - start) {
+        case 1:
+            return IsSymbol(start, 1) && !IsSymbol(start, 2);
+        case 2:
+            return IsSymbol(start, 2);
+        default:
+            return false;
+        }
     }
 
     bool IsNextSymbol() {
@@ -58,22 +58,24 @@ private:
 
 
     bool IsToken(unsigned int start) {
-        // !IsEndLine() && !IsSymbolFrom(startIdx) && !IsNextSymbol() && !(IsWhiteSpace() && !isInString) && !(isInString && finishedStringBoundry)
         if (IsEndLine())
             return true;
+        if (m_isInString)
+            return false;
         if (IsSymbolFrom(start))
             return true;
-        if (IsSymbol(m_currentIdx-1, 2))
+        if (IsSymbol(m_currentIdx - 1, 2))
             return false;
         if (IsNextSymbol())
             return true;
-        if (!m_isInString && IsWhiteSpace())
+        if (IsWhiteSpace())
             return true;
         return false;
     }
-    public:
+public:
     Tokenizer(std::string& query)
-        : m_query(query), m_currentIdx(0), m_isInString(false) {}
+        : m_query(query), m_currentIdx(0), m_isInString(false) {
+    }
 
     char Peek() const {
         if (IsEndLine())
@@ -82,9 +84,9 @@ private:
     }
 
     std::string PeekAhead() const {
-        if ( m_currentIdx + 1 >= m_query.length())
+        if (m_currentIdx + 1 >= m_query.length())
             return "\0";
-        return std::string {m_query[m_currentIdx + 1]};
+        return std::string{ m_query[m_currentIdx + 1] };
     }
 
     char Advance() {
@@ -104,16 +106,15 @@ private:
         unsigned int startIdx = m_currentIdx;
         m_isInString = IsStringBoundry();
         bool finishedStringBoundry = false;
-        do{
+        do {
             Advance();
             if (m_isInString && IsStringBoundry()) {
                 finishedStringBoundry = true;
                 m_isInString = false;
                 Advance();
             }
-        }
-        while (!IsToken(startIdx) && !finishedStringBoundry);
-        
+        } while (!IsToken(startIdx) && !finishedStringBoundry);
+
         return m_query.substr(startIdx, (m_currentIdx - startIdx));
     }
 
