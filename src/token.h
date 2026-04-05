@@ -89,6 +89,55 @@ const std::unordered_map<std::string, TokenType> KEYWORD_TOKEN_MAP = {
 
 const char STRING_ENCAPSULATOR = '\'';
 
+std::string toString(TokenType type) {
+    switch (type) {
+        case TokenType::STRING: return "STRING";
+        case TokenType::INTEGER: return "INTEGER";
+        case TokenType::IDENTIFIER: return "IDENTIFIER";
+
+        case TokenType::OP_EQUAL: return "=";
+        case TokenType::OP_NOT_EQUAL: return "!=";
+        case TokenType::OP_PLUS: return "+";
+        case TokenType::OP_MINUS: return "-";
+        case TokenType::OP_STAR: return "*";
+        case TokenType::OP_SLASH: return "/";
+        case TokenType::OP_LESS: return "<";
+        case TokenType::OP_GREATER: return ">";
+        case TokenType::OP_LESS_EQUAL: return "<=";
+        case TokenType::OP_GREATER_EQUAL: return ">=";
+        case TokenType::OP_CONCAT: return "||";
+        case TokenType::OP_DOT: return ".";
+        case TokenType::OP_PERCENT: return "%";
+
+        case TokenType::COMMA: return ",";
+        case TokenType::LEFT_PAREN: return "(";
+        case TokenType::RIGHT_PAREN: return ")";
+        case TokenType::SEMICOLON: return ";";
+
+        case TokenType::KW_QUIT: return ".quit";
+        case TokenType::KW_TABLES: return ".tables";
+
+        case TokenType::KW_SELECT: return "SELECT";
+        case TokenType::KW_FROM: return "FROM";
+        case TokenType::KW_WHERE: return "WHERE";
+        case TokenType::KW_INSERT: return "INSERT";
+        case TokenType::KW_INTO: return "INTO";
+        case TokenType::KW_VALUES: return "VALUES";
+        case TokenType::KW_UPDATE: return "UPDATE";
+        case TokenType::KW_SET: return "SET";
+        case TokenType::KW_DELETE: return "DELETE";
+        case TokenType::KW_CREATE: return "CREATE";
+        case TokenType::KW_TABLE: return "TABLE";
+        case TokenType::KW_AND: return "AND";
+        case TokenType::KW_OR: return "OR";
+        case TokenType::KW_NOT: return "NOT";
+        case TokenType::KW_NULL: return "NULL";
+        case TokenType::KW_AS: return "AS";
+
+        default: return "UNKNOWN";
+    }
+}
+
 bool IsDigit(char chr) {
     return chr >= '0' && chr <= '9';
 }
@@ -115,10 +164,40 @@ public:
     TokenType GetType() const {
         return m_type;
     }
+    
+    unsigned int GetIdxAfterWord() const {
+        return m_idx + static_cast<unsigned int>(m_value.length());
+    }
 
     bool IsType(TokenType type) const {
         return m_type == type;
     }
+
+    bool IsOneOfTypes(std::vector<TokenType> types) const {
+        for (TokenType& type: types) {
+            if (IsType(type))
+                return true;
+        }
+        return false;
+    }
+
+    inline const Token AssertType(TokenType expected) const {
+        if (!IsType(expected))
+            throw GetUnexpectedTokenException(expected);
+        return *this;
+    } 
+
+    inline const Token AssertType(TokenType expected, std::string message) const {
+        if (!IsType(expected))
+            throw GetUnexpectedTokenException(expected, message);
+        return *this;
+    } 
+
+    inline const Token AssertOneOfTypes(std::vector<TokenType> types) const {
+        if (!IsOneOfTypes(types))
+            throw GetUnexpectedTokenException(types);
+        return *this;
+    } 
 
     void Print() const {
         std::cout << '[' << m_idx << "-" << m_idx + m_value.length() << "] " << static_cast<int>(m_type) << ": " << m_value << std::endl;
@@ -128,8 +207,38 @@ public:
         return InvalidTokenException(m_value, "", m_idx);
     }
 
-    InvalidTokenException GetInvalidTokenException(std::string message) {
+    InvalidTokenException GetInvalidTokenException(std::string message) const {
         return InvalidTokenException(m_value, message, m_idx);
+    }
+    
+    UnexpectedTokenException GetUnexpectedTokenException(TokenType expected) const {
+        return UnexpectedTokenException(m_value, toString(expected), m_idx);
+    }
+
+    UnexpectedTokenException GetUnexpectedTokenException(TokenType expected, std::string message) const {
+        return UnexpectedTokenException(m_value, toString(expected), message, m_idx);
+    }
+
+    UnexpectedTokenException GetUnexpectedTokenException(std::vector<TokenType> expected) const {
+        std::vector<std::string> expectedStr;
+        for (TokenType& type : expected)
+            expectedStr.push_back(toString(type));
+        return UnexpectedTokenException(m_value, expectedStr, m_idx);
+    }
+
+    UnexpectedTokenException GetUnexpectedTokenException(std::vector<TokenType> expected, std::string message) const {
+        std::vector<std::string> expectedStr;
+        for (TokenType& type : expected)
+            expectedStr.push_back(toString(type));
+        return UnexpectedTokenException(m_value, expectedStr, message, m_idx);
+    }
+
+    MissingTokenException GetMissingTokenException() const {
+        return MissingTokenException(GetIdxAfterWord() + 1);
+    }
+
+    MissingTokenException GetMissingTokenException(TokenType requiredToken) const {
+        return MissingTokenException(toString(requiredToken), GetIdxAfterWord() + 1);
     }
 
     static TokenType GetTokenType(std::string word, unsigned int idx) {

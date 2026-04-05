@@ -49,7 +49,7 @@ public:
     }
 
     std::string Execute() override {
-        std::string result;
+        std::string result = m_tableName + "\n";
         for (const std::string& column : m_columns)
             result += column + ", ";
         return result;
