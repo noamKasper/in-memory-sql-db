@@ -1,6 +1,7 @@
 #include <string>
 #include <exception>
 #include <unordered_map>
+#include <unordered_set>
 #include "exception.h"
 
 
@@ -173,12 +174,8 @@ public:
         return m_type == type;
     }
 
-    bool IsOneOfTypes(std::vector<TokenType> types) const {
-        for (TokenType& type: types) {
-            if (IsType(type))
-                return true;
-        }
-        return false;
+    bool IsType(std::unordered_set<TokenType> types) const {
+        return types.find(m_type) != types.end();
     }
 
     inline const Token AssertType(TokenType expected) const {
@@ -193,8 +190,8 @@ public:
         return *this;
     } 
 
-    inline const Token AssertOneOfTypes(std::vector<TokenType> types) const {
-        if (!IsOneOfTypes(types))
+    inline const Token AssertType(std::unordered_set<TokenType> types) const {
+        if (!IsType(types))
             throw GetUnexpectedTokenException(types);
         return *this;
     } 
@@ -217,6 +214,20 @@ public:
 
     UnexpectedTokenException GetUnexpectedTokenException(TokenType expected, std::string message) const {
         return UnexpectedTokenException(m_value, toString(expected), message, m_idx);
+    }
+
+    UnexpectedTokenException GetUnexpectedTokenException(std::unordered_set<TokenType> expected) const {
+        std::vector<std::string> expectedStr;
+        for (const TokenType& type : expected)
+            expectedStr.push_back(toString(type));
+        return UnexpectedTokenException(m_value, expectedStr, m_idx);
+    }
+
+    UnexpectedTokenException GetUnexpectedTokenException(std::unordered_set<TokenType> expected, std::string message) const {
+        std::vector<std::string> expectedStr;
+        for (const TokenType& type : expected)
+            expectedStr.push_back(toString(type));
+        return UnexpectedTokenException(m_value, expectedStr, message, m_idx);
     }
 
     UnexpectedTokenException GetUnexpectedTokenException(std::vector<TokenType> expected) const {

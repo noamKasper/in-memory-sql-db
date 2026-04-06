@@ -4,7 +4,11 @@
 
 struct SubCondition;
 
+
 struct Condition {
+    Token* logicalOperator; // NOT, AND, OR ...
+    Token lvalue;
+    Token rvalue;
     SubCondition* subCondition;
     Token conditionOperator;
 };

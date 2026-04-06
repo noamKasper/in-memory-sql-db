@@ -3,14 +3,24 @@
 #include <exception>
 #include <sstream>
 #include <iostream>
+#include <unordered_set>
 #include "tokenizer.h"
 #include "engine.h"
+
+static const std::unordered_set<TokenType> CONDITION_VALUE_TYPES = {TokenType::IDENTIFIER, TokenType::INTEGER, TokenType::STRING};
+enum class State { COLUMNS, TABLE, CONDITION, END };
+
+State& operator++(State& s) {
+    if (s == State::END)
+        return s;
+    return s = static_cast<State>(static_cast<int>(s) + 1);
+}
 
 class SelectParser {
 private:
     std::vector<Token> m_tokens;
     unsigned int m_idx;
-    enum State { COLUMNS, TABLE, CONDITION } m_state;
+    State m_state;
 public:
     static const TokenType BASE_TOKEN = TokenType::KW_SELECT;
     static const unsigned int MINIMUM_SIZE_QUERY = 3;
@@ -42,18 +52,18 @@ private:
         return !IsFinished(m_idx + 1) && m_tokens.at(m_idx + 1).IsType(type);
     }
 
-    std::vector<TokenType> StateTerminators() {
+    std::unordered_set<TokenType> StateTerminators() {
         switch (m_state) {
-        case COLUMNS: return std::vector<TokenType> { TokenType::KW_FROM };
-        case TABLE: return std::vector<TokenType> { TokenType::KW_WHERE, TokenType::SEMICOLON };
-        default: return std::vector<TokenType> { TokenType::SEMICOLON };
+        case State::COLUMNS: return { TokenType::KW_FROM };
+        case State::TABLE: return { TokenType::KW_WHERE, TokenType::SEMICOLON };
+        default: return { TokenType::SEMICOLON };
         }
     }
-
+    
     std::vector<std::string> ParseColumns() {
         if (Current().IsType(ALL_COLUMNS_TOKEN)) {
             Next();
-            return std::vector<std::string> { toString(ALL_COLUMNS_TOKEN) };
+            return { toString(ALL_COLUMNS_TOKEN) };
         }
 
         std::vector<std::string> columns;
@@ -68,12 +78,20 @@ private:
             }
             token.AssertType(TokenType::COMMA);
             wasLastComma = true;
-        } while (!IsFinished() && !Current().IsOneOfTypes(StateTerminators()));
+        } while (!IsFinished() && !Current().IsType(StateTerminators()));
         return columns;
     }
 
     std::string ParseTable() {
         return Next().AssertType(TokenType::IDENTIFIER).GetValue();
+    }
+        Token ParseConditionValue() {
+            return Current().AssertType(CONDITION_VALUE_TYPES);
+    }
+    Condition ParseCondition() {
+        Token lvalue = ParseConditionValue();
+
+        Token operator
     }
 public:
     SelectParser(std::vector<Token> tokens)
@@ -91,21 +109,22 @@ public:
 
         if (IsFinished())
             throw Last().GetMissingTokenException();
-        Next().AssertOneOfTypes(StateTerminators());
+        Next().AssertType(StateTerminators());
         if (IsFinished())
             throw Last().GetMissingTokenException();
 
-        m_state = State::TABLE;
+        ++m_state;
         auto table = ParseTable();
         if (IsFinished())
             throw Last().GetMissingTokenException();
-        Next().AssertOneOfTypes(StateTerminators());
+        Next().AssertType(StateTerminators());
 
         if (IsFinished() || Current().IsType(TokenType::SEMICOLON))
             return new SelectCommand(table, columns);
         return new SelectCommand(table, columns); // debug purposes
     }
 };
+
 CommandInterface* Parser(std::vector<Token> tokens) {
     if (tokens.size() == 0)
         throw NoTokensParserError();
