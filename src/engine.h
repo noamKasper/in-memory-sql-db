@@ -1,16 +1,17 @@
 #include <string>
 #include <vector>
+#include <optional>
 #include "tokenizer.h"
 
 struct SubCondition;
 
 
 struct Condition {
-    Token* logicalOperator; // NOT, AND, OR ...
     Token lvalue;
     Token rvalue;
-    SubCondition* subCondition;
     Token conditionOperator;
+    Token* logicalOperator; // NOT, AND, OR ...
+    SubCondition* subCondition;
 };
 
 struct SubCondition {
@@ -42,20 +43,18 @@ class SelectCommand : public CommandInterface {
 private:
     std::string m_tableName;
     std::vector<std::string> m_columns;
-    std::vector<Condition> m_conditions;
+    std::optional<Condition> m_conditions;
 public:
-    SelectCommand(std::string tableName, std::vector<std::string> columns, std::vector<Condition> conditions)
+    SelectCommand(std::string tableName, std::vector<std::string> columns, std::optional<Condition> conditions = std::nullopt)
         : m_tableName(tableName), m_columns(columns), m_conditions(conditions) {
-    }
-
-    SelectCommand(std::string tableName, std::vector<std::string> columns)
-        : m_tableName(tableName), m_columns(columns), m_conditions() {
     }
 
     std::string Execute() override {
         std::string result = m_tableName + "\n";
         for (const std::string& column : m_columns)
             result += column + ", ";
+        if (m_conditions.has_value())
+            result += '\n' + m_conditions->lvalue.GetValue() + m_conditions->conditionOperator.GetValue() + m_conditions->rvalue.GetValue();
         return result;
     }
 };

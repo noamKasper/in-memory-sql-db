@@ -22,8 +22,8 @@ int main(int, char**) {
         Tokenizer tokenzier = Tokenizer(query);
         auto tokens = tokenzier.Tokenize();
         
-        PrintTokens(tokens); // debug function
-        auto output = Parser(tokens)->Execute();
+        // PrintTokens(tokens); // debug function
+        auto output = Parse(tokens)->Execute();
         std::cout << output << std::endl;
     }
     catch (GeneralException& e) {
