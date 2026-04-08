@@ -3,20 +3,13 @@
 #include <optional>
 #include "tokenizer.h"
 
-struct SubCondition;
-
 
 struct Condition {
     Token lvalue;
     Token rvalue;
     Token conditionOperator;
     Token* logicalOperator; // NOT, AND, OR ...
-    SubCondition* subCondition;
-};
-
-struct SubCondition {
-    Token logicalOperator;
-    Condition* condition;
+    Condition* subCondition;
 };
 
 class CommandInterface {
